@@ -14,6 +14,7 @@ encoder enc;
 
 bool flag = 0;
 int old_counter = 0;
+double deg = 0;
 
 
 
@@ -54,7 +55,9 @@ ISR (INT0_vect)
 		led.set_lo();
 	}
 	
-	Serial.print(enc.get_counter());
+	//Serial.print(enc.get_counter());
+	deg = enc.get_counter()*360.0/1400.0;
+	Serial.print(deg);
 	Serial.print('\n');
 	old_counter = enc.get_counter();
 }

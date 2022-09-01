@@ -33,6 +33,10 @@ int encoder::get_counter()
     return counter;
 }
 
+void encoder::reset_counter()
+{
+    counter = 0;
+}
 
 int encoder::position(bool enc_input1, bool enc_input2)
 {
