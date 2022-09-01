@@ -16,8 +16,6 @@ bool flag = 0;
 int old_counter = 0;
 double deg = 0;
 
-
-
 int main()
 {
 	Serial.begin(9600);
@@ -25,28 +23,33 @@ int main()
 	encoder_input1.init();
 	encoder_input2.init();
 	enc.init(encoder_input1.is_hi());
-	enc.init_interrupt();
+	
+	enc.init_interrupt(); // nota ef thad a ad nota interrupts!!
 
 	//timer.init(3);
 	sei(); // enable interrupts
-	
-	//bool last_input1 = encoder_input1.is_hi();
+
 	while(1)
 	{
-		/* led.set_hi();
+		/* 
 		enc.position(encoder_input1.is_hi(), encoder_input2.is_hi());
-		led.set_lo();
-		Serial.print(enc.get_counter());
-        Serial.print('\n'); */
+		if (enc.get_counter() > old_counter)
+		{
+			led.set_hi();
+		}
+		else {
+			led.set_lo();
+		}
+		deg = enc.get_counter()*360.0/1400.0;
+		Serial.print(deg);
+		Serial.print('\n');
+		old_counter = enc.get_counter(); */
 	}
-
-	
 }
 
 ISR (INT0_vect)
 {
 	enc.position(encoder_input1.is_hi(), encoder_input2.is_hi());
-	
 	if (enc.get_counter() > old_counter)
 	{
 		led.set_hi();
@@ -54,7 +57,6 @@ ISR (INT0_vect)
 	else {
 		led.set_lo();
 	}
-	
 	//Serial.print(enc.get_counter());
 	deg = enc.get_counter()*360.0/1400.0;
 	Serial.print(deg);
@@ -62,49 +64,10 @@ ISR (INT0_vect)
 	old_counter = enc.get_counter();
 }
 
+// hinn interrupt pinninn
 //ISR (INT1_vect)
 //{
 //	/* interrupt handler code here */
 //	Serial.print('int1 active');
 //	Serial.print('\n');	
 //}
-
-//////////////////////////////////////////////////////////
-////////////// svor vid spurningum ///////////////////////
-
-/* 
-Part 1:
-max sirka 4.2 er max sek thvi: 16000000 / 1024 - 1 = 15624 en ma max 
-fara upp i 65536.
-
-
-//
-// Part 2:
-vid 25 ms (40 hz) og 0.2 duty cycle virdist
-ljosid vera ordid stodugt og haett ad blikka!
-
-//
-// Part 3:
-Thad sest greinilega ad birtustigid haekkar thegar
-ad duty cycle er haekkad!
-
- */
-
-
-/* ISR(TIMER1_COMPA_vect)
-{
-	// action to be done every 1 sec
-	led.toggle();
-}
-
-// fyrir duty cycle
-ISR (TIMER1_COMPA_vect)
-{
-// action to be taken at the start of the on-cycle
-	led.set_hi();
-}
-ISR (TIMER1_COMPB_vect)
-{
-// action to be taken at the start of the off-cycle
-	led.set_lo();
-} */
