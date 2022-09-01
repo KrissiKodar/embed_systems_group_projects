@@ -22,10 +22,10 @@ void encoder::init_interrupt()
     EICRA |= (1 << ISC00); // set INT0 to trigger on ANY logic change
     EIMSK |= (1 << INT0); // Turns on INT0
 
-    DDRD &= ~(1 << DDD3); // set the PD3 pin as input
-    PORTD |= (1 << PORTD3); // enable pull-up resistor on PD3
-    EICRA |= (1 << ISC01); // set INT1 to trigger on ANY logic change
-    EIMSK |= (1 << INT1); // Turns on INT1
+    //DDRD &= ~(1 << DDD3); // set the PD3 pin as input
+    //PORTD |= (1 << PORTD3); // enable pull-up resistor on PD3
+    //EICRA |= (1 << ISC01); // set INT1 to trigger on ANY logic change
+    //EIMSK |= (1 << INT1); // Turns on INT1
 }
 
 int encoder::get_counter()

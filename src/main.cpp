@@ -12,6 +12,11 @@ Digital_in encoder_input2(3);
 encoder enc;
 //Timer_msec timer;
 
+bool flag = 0;
+int old_counter = 0;
+
+
+
 int main()
 {
 	Serial.begin(9600);
@@ -39,19 +44,27 @@ int main()
 
 ISR (INT0_vect)
 {
-	led.set_hi();
 	enc.position(encoder_input1.is_hi(), encoder_input2.is_hi());
-	led.set_lo();
+	
+	if (enc.get_counter() > old_counter)
+	{
+		led.set_hi();
+	}
+	else {
+		led.set_lo();
+	}
+	
 	Serial.print(enc.get_counter());
 	Serial.print('\n');
+	old_counter = enc.get_counter();
 }
 
-ISR (INT1_vect)
-{
-/* interrupt handler code here */
-	Serial.print('int1 active');
-	Serial.print('\n');	
-}
+//ISR (INT1_vect)
+//{
+//	/* interrupt handler code here */
+//	Serial.print('int1 active');
+//	Serial.print('\n');	
+//}
 
 //////////////////////////////////////////////////////////
 ////////////// svor vid spurningum ///////////////////////
