@@ -1,7 +1,7 @@
 #include <digital_out.h>
 #include <digital_in.h>
 #include <timer_msec.h>
-#include <util/delay.h>
+#include <avr/delay.h>
 #include <avr/interrupt.h>
 #include <encoder.h>
 #include <Arduino.h>
@@ -31,8 +31,8 @@ int main()
 
 	while(1)
 	{
-		/* 
-		enc.position(encoder_input1.is_hi(), encoder_input2.is_hi());
+		
+		/* enc.position(encoder_input1.is_hi(), encoder_input2.is_hi());
 		if (enc.get_counter() > old_counter)
 		{
 			led.set_hi();
@@ -40,15 +40,18 @@ int main()
 		else {
 			led.set_lo();
 		}
-		deg = enc.get_counter()*360.0/1400.0;
-		Serial.print(deg);
+		//deg = enc.get_counter()*360.0/1400.0;
+		Serial.print(enc.get_counter());
+		//Serial.print(deg);
 		Serial.print('\n');
-		old_counter = enc.get_counter(); */
+		old_counter = enc.get_counter(); 
+		_delay_us(276.5/4); */
 	}
 }
 
 ISR (INT0_vect)
 {
+	
 	enc.position(encoder_input1.is_hi(), encoder_input2.is_hi());
 	if (enc.get_counter() > old_counter)
 	{
@@ -58,12 +61,11 @@ ISR (INT0_vect)
 		led.set_lo();
 	}
 	//Serial.print(enc.get_counter());
-	deg = enc.get_counter()*360.0/1400.0;
-	Serial.print(deg);
+	//deg = enc.get_counter()*360.0/1400.0;
+	Serial.print(enc.get_counter());
 	Serial.print('\n');
 	old_counter = enc.get_counter();
 }
-
 // hinn interrupt pinninn
 //ISR (INT1_vect)
 //{
