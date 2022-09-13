@@ -1,6 +1,7 @@
 #include <digital_out.h>
 #include <digital_in.h>
 #include <timer_msec.h>
+#include <timer2_msec.h>
 #include <avr/delay.h>
 #include <avr/interrupt.h>
 #include <encoder.h>
@@ -8,24 +9,27 @@
 
 Digital_out in_1(0);
 Digital_out in_2(4);
-//Digital_out PWM_pin(1);
+Digital_out PWM_pin(1);
 Digital_in encoder_input1(2);
 Digital_in encoder_input2(3);
 encoder enc;
 
-// we most likely need a second timer for the PWM
+// we most likely need a second timer for the
 Timer_msec timer1;
+Timer2_msec timer2;
 
 int old_counter = 0;
 double deg = 0.0;
-double interval = 200.0;
+double interval = 20.0;
 double speed = 0.0;
-double max_speed = 1000.0; // need to find this valur
+double max_speed = 137.0; // need to find this value RPM
 bool check = true;
-double time_constant = 0.0; // need to find this value
+bool GO = false;
+double time_constant = 1080.0; // need to find this value ms
+double update_rate = 10.0/time_constant;
 
-int timer1_count = 0;
-float duty_cycle = 0.5;
+double timer1_count = 0;
+float duty_cycle = 0.05;
 
 double set_speed = 10.0;
 double error = 0.0;
@@ -37,10 +41,11 @@ int main()
 	Serial.begin(9600);
 
 	/////////// for H-bridge /////////////
+	PWM_pin.init();
 	in_1.init();
 	in_2.init();
-	in_1.set_hi();
-	in_2.set_lo();
+	in_1.set_lo();
+	in_2.set_hi();
 
 	//PWM_pin.init();
 
@@ -54,32 +59,30 @@ int main()
 	/////////// for timer /////////////
 	// find out what frequency is needed for PWM
 	timer1.init(interval);
+	timer2.init(15000, duty_cycle); //MICROSEC
 	//timer1.init(interval,duty_cycle);
 	
 	sei(); // enable interrupts
 
-	while(1)
+	while(true)
 	{	
 
 		// Part 2 measure maximum motor speed
-		if (speed >= max_speed)
+		/* if (speed >= max_speed)
 		{
 			speed = max_speed;
 			Serial.println("Maximum speed: ");
 			Serial.println(speed);
-		}
-
+		} */
 		// Part 2 measure time constant
 		// measure time it takes to reach 63% of max speed
 		// the max speed needs to  be measured first !!!!
-		/* if (speed >= 0.63 * max_speed && check)
-		{
-			time_constant = time_value;
-			Serial.print("time constant: ");
-			Serial.println(time_constant);
-			check = false;
-		} */
-
+		//Serial.println(speed);	
+		//Serial.println(speed >= 0.63*max_speed);	
+		// print time_counter when the speed reaches 63% of max speed
+		
+		
+		
 		// Part 3 P control
 		// control output should be updated at a mininum rate
 		// set speed to x pulses per second
@@ -94,29 +97,45 @@ ISR (INT0_vect)
 {
 	// increment/decrement counter
 	enc.position(encoder_input1.is_hi(), encoder_input2.is_hi());
+	//GO = true;
 }
 
 ISR(TIMER1_COMPA_vect)
 {
 	// interrupts every interval ms
-	// speed -> pulses per second
-	speed = (enc.get_counter()/interval)/1000.0;
+	// speed -> pulses per ms ---> pulses per second
+	//speed = (enc.get_counter()/interval)*1000.0;
 	// or in RPM
-	//speed = (((enc.get_counter()/interval)*1000.0)/1400.0)*60.0;
+	/* if (GO == true)
+	{
+		timer1_count += interval;
+	} */
+	
+	speed = (((enc.get_counter()/interval)*1000.0)/1400.0)*60.0;
 	// 
 	enc.reset_counter();
-	Serial.print(speed);
-	Serial.print('\n');
+	/* if (speed >= 0.63*max_speed && check)
+		{
+			Serial.println("Time constant: ");
+			Serial.println(timer1_count);
+			check = false;
+		} */
+	Serial.println(speed);
 
-	// for PWM
-	//PWM_pin.set_hi();
+	
+	
 }
 
-/* //PWM
-ISR(TIMER0_COMPB_vect)
+ISR(TIMER2_COMPA_vect)
+{
+	// for PWM
+	PWM_pin.set_hi();
+}
+//PWM
+ISR(TIMER2_COMPB_vect)
 {
 	PWM_pin.set_lo();
-} */
+}
 
 // The other interrupt pin
 //ISR (INT1_vect)
