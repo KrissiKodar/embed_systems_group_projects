@@ -33,5 +33,5 @@ void Timer2_msec::init(int period_microsec, float duty_cycle)
 
 void Timer2_msec::set(float duty_cycle)
 {
-    OCR2B = static_cast<uint16_t>(OCR2A * duty_cycle); // assign target count to compare register B (should not exceed value of OCR1A)
+    OCR2B = static_cast<uint8_t>(OCR2A * duty_cycle); // assign target count to compare register B (should not exceed value of OCR1A)
 }

@@ -1,10 +1,12 @@
 #include <digital_out.h>
 #include <digital_in.h>
+#include <timer0_msec.h>
 #include <timer_msec.h>
 #include <timer2_msec.h>
 #include <avr/delay.h>
 #include <avr/interrupt.h>
 #include <encoder.h>
+#include <p_controller.h>
 #include <Arduino.h>
 
 Digital_out in_1(0);
@@ -12,9 +14,11 @@ Digital_out in_2(4);
 Digital_out PWM_pin(1);
 Digital_in encoder_input1(2);
 Digital_in encoder_input2(3);
+P_controller controller;
 encoder enc;
 
 // we most likely need a second timer for the
+Timer0_msec timer0;
 Timer_msec timer1;
 Timer2_msec timer2;
 
@@ -25,15 +29,17 @@ double speed = 0.0;
 double max_speed = 137.0; // need to find this value RPM
 bool check = true;
 bool GO = false;
-double time_constant = 1080.0; // need to find this value ms
+double time_constant = 60.0; // need to find this value ms
 double update_rate = 10.0/time_constant;
 
 double timer1_count = 0;
-float duty_cycle = 0.05;
+float duty_cycle = 0.0;
 
-double set_speed = 10.0;
+double control_rate = 10.0/(60.0/1000.0);
+double set_speed = 100.0;
 double error = 0.0;
 double P = 1.0;
+double control_signal = 0.0;
 
 int main()
 {
@@ -58,10 +64,14 @@ int main()
 
 	/////////// for timer /////////////
 	// find out what frequency is needed for PWM
+	timer0.init((1.0/control_rate)*1000000.0); //MICROSEC
 	timer1.init(interval);
 	timer2.init(15000, duty_cycle); //MICROSEC
+	
 	//timer1.init(interval,duty_cycle);
 	
+	// for controller
+	controller.init(P);
 	sei(); // enable interrupts
 
 	while(true)
@@ -100,6 +110,19 @@ ISR (INT0_vect)
 	//GO = true;
 }
 
+ISR(TIMER0_COMPA_vect)
+{
+	// Part 3 P control
+	// control output should be updated at a mininum rate
+	// set speed to x pulses per second
+	// calculate error
+	control_signal = controller.update(set_speed, speed);
+	//Serial.println(controller.update(set_speed, speed));
+	//Serial.println(control_signal/set_speed-0.01);
+	timer2.set(control_signal/set_speed-0.01);
+	
+}
+
 ISR(TIMER1_COMPA_vect)
 {
 	// interrupts every interval ms
@@ -121,8 +144,6 @@ ISR(TIMER1_COMPA_vect)
 			check = false;
 		} */
 	Serial.println(speed);
-
-	
 	
 }
 
