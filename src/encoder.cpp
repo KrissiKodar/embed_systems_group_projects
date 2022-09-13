@@ -40,25 +40,19 @@ void encoder::reset_counter()
 
 int encoder::position(bool enc_input1, bool enc_input2)
 {
-    //bla = led*;
-    //led = &led;
     bool encoder_input1_state = enc_input1;
-    //_delay_ms(10);
     if (encoder_input1_state != last_input1)
     {
         if (enc_input2 != encoder_input1_state)
         {
             counter++;
-            //led.set_hi();
         }
         else
         {
             counter--;
-            //led.set_hi();
         }
         
         last_input1 = encoder_input1_state;
-        //led.set_lo();
     }
     return counter;
 }
